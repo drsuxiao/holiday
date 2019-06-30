@@ -1,0 +1,33 @@
+{% extends 'base_dicts.html' %}
+{% block title %}科室信息管理{% endblock %}
+
+{% block script %}
+{{ super() }}
+
+<!-- 表格个性化 -->
+<script>
+    initTable('/repair/api/v1.0/departments', ['科室编码','科室名称']);
+</script>
+<!-- 模态框按钮事件 -->
+<script type="text/javascript">
+    $("#delete_confirm").click(function(){
+         if (action == 'delete'){
+             url = '/repair/api/v1.0/departments/delete/' + cur_key
+             ajax_post_data(url, {});
+         };
+    });
+    //新增，编辑根据post的url来区别
+    $("#modal_save").click(function(e) {
+        if ($("#code").val() && $("#name").val()){
+            e.preventDefault();
+            if (action == 'add'){
+                url = '/repair/api/v1.0/departments/add';
+            } else if (action == 'edit'){
+                url = '/repair/api/v1.0/departments/edit/' + cur_key;
+            }else{url = ''};
+            ajax_post_data(url, get_json_data());
+        }
+    });
+</script>
+
+{% endblock %}

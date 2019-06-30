@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>考勤登记系统</title>
+
+    <link href="{{url_for('static', filename='css/bootstrap.min.css')}}" rel="stylesheet" type="text/css"/>
+    <link href="{{url_for('static', filename='css/bootstrap-table.css')}}" rel="stylesheet" type="text/css"/>
+    <link href="{{url_for('static', filename='css/bootstrap-datepicker.min.css')}}" rel="stylesheet" type="text/css"/>
+    <link href="{{url_for('static', filename='css/bootstrap-select.min.css')}}" rel="stylesheet" type="text/css"/>
+    <link href="{{url_for('static', filename='css/toastr.min.css')}}?v=1.0" rel="stylesheet" type="text/css"/>
+    <link href="{{url_for('static', filename='css/jquery-editable-select.min.css')}}" rel="stylesheet" type="text/css"/>
+    <script src="{{url_for('static', filename='js/html5shiv.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/respond.min.js')}}"></script>
+    <!-- HTML5 shim 和 Respond.js 是为了让 IE8 支持 HTML5 元素和媒体查询（media queries）功能 -->
+    <!-- 警告：通过 file:// 协议（就是直接将 html 页面拖拽到浏览器中）访问页面时 Respond.js 不起作用 -->
+    <!--[if lt IE 9]>
+      <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+    <!--[endif]-->
+
+    {% endblock %}
+
+        <!-- 顶部导航菜单 -->
+    {% block navbar %}
+    <div class="navbar navbar-inverse" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle"
+                data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">考勤登记系统</a>
+            </div>
+
+        </div>
+    </div>
+    {% endblock %}
+</head>
+    <body>
+        <div class="content-fluid">
+            <div class="row">
+                <!-- 左侧导航栏 -->
+                <div class="col-md-2 col-sm-3">
+                    {% block right %}
+                    <div id="leftmenu">
+                        <div>
+                            <a href="#p1" class="list-group-item menu-color" data-toggle="collapse">
+                                <div class="glyphicon glyphicon-wrench"></div>常用菜单
+                                <span class="glyphicon glyphicon-chevron-down pull-right"></span>
+                            </a>
+                            <div class="collapse" id="p1">
+                                <a class="list-group-item" href="{{ url_for('show_apply') }}">&#12288;&#12288;请假申请</a>
+                                <a class="list-group-item" href="{{ url_for('show_audit') }}">&#12288;&#12288;请假审核</a>
+                                <a class="list-group-item" href="{{ url_for('show_information') }}">&#12288;&#12288;个人信息</a>
+                               <!-- <a class="list-group-item" href="#">&#12288;&#12288;密码修改</a> -->
+                            </div>
+                        </div>
+                        <div style="margin-top:10px">
+                            <a href="#p2" class="list-group-item menu-color" data-toggle="collapse">
+                                <div class="glyphicon glyphicon-floppy-disk"></div>数据查询
+                                <span class="glyphicon glyphicon-chevron-down pull-right"></span>
+                            </a>
+                            <div class="collapse" id="p2">
+                                <a class="list-group-item" href="{{ url_for('show_apply_holidays') }}">&#12288;&#12288;公休使用情况查询</a>
+                                <a class="list-group-item" href="{{ url_for('show_apply_detail') }}">&#12288;&#12288;请假明细数据查询</a>
+                                <a class="list-group-item" href="{{ url_for('show_apply_statistical') }}">&#12288;&#12288;请假汇总数据查询</a>
+                            </div>
+                        </div>
+                       <!-- <div style="margin-top:10px">
+                            <a href="#p3" class="list-group-item menu-color" data-toggle="collapse">
+                                <div class="glyphicon glyphicon-floppy-disk"></div>用户管理
+                                <span class="glyphicon glyphicon-chevron-down pull-right"></span>
+                            </a>
+                            <div class="collapse" id="p3">
+                                <a class="list-group-item" href="#">&#12288;&#12288;用户维护</a>
+                                <a class="list-group-item" href="#">&#12288;&#12288;角色维护</a>
+                            </div>
+                        </div>-->
+                    </div>
+                    {% endblock %}
+                </div>  <!-- 增加小屏幕时的布局适应优化 -->
+                <!-- 右侧内容页 -->
+                <div class="col-md-10 col-sm-9">
+                    <ul class="breadcrumb">
+                        <li><a href="#" id="r_home">首页</a></li>
+                        <li class="active" id="top_title"></li>
+                    </ul>
+                    <div id="myTabContent" class="tab-content">
+                        <div class="tab-pane fade in active" id="show_page"></div>
+                    </div>
+
+                    <div id="footer">{% block footer %}&copy; Copyright 2019 by you{% endblock %}</div>
+                </div>
+            </div>
+        </div>
+
+        {% block js %}
+        <script src="{{url_for('static', filename='js/jquery.min.js')}}"></script>
+        <script src="{{url_for('static', filename='js/jquery-ui.min.js')}}"></script>
+        <script src="{{url_for('static', filename='js/bootstrap.min.3.3.js')}}"></script>
+        <script src="{{url_for('static', filename='js/bootstrap-table.js')}}"></script>
+        <script src="{{url_for('static', filename='js/bootstrap-datepicker.min.js')}}"></script>
+        <script src="{{url_for('static', filename='js/bootstrap-datepicker.zh-CN.min.js')}}"></script>
+        <script src="{{url_for('static', filename='js/bootstrap-select.min.js')}}"></script>
+        <script src="{{url_for('static', filename='js/bootstrap-table-export.js')}}"></script>
+        <script src="{{url_for('static', filename='js/tableexport.js')}}"></script>
+        <script src="{{url_for('static', filename='js/bootstrap-table-zh-CN.min.js')}}"></script>
+        <script src="{{url_for('static', filename='js/toastr.min.js')}}"></script>
+        <script src="{{url_for('static', filename='js/jquery-editable-select.min.js')}}"></script>
+        <!--<script src="{{url_for('static', filename='js/showtip.js')}}"></script> -->
+        {% endblock %}
+    </body>
+
+{% block script %}
+<script>
+    //$("#show_page").load('/');
+    $("div.collapse a.list-group-item").click(function(e){
+        e.preventDefault();
+        //alert($(this).attr('href'));
+        $("#top_title").text($.trim(this.text));
+        $(this).addClass("active");
+        $("#show_page").load($(this).attr('href'));
+    });
+    $("#leftmenu .list-group-item").click(function(){
+    setActiveMenu(this);
+    });
+    //设置菜单选中状态
+    function setActiveMenu(item){
+        //清楚所有项目的选中状态
+        $("#leftmenu .list-group-item").each(function () {
+            $(this).removeClass('active');
+             //alert(flag);
+        });
+        /*切换折叠指示图标*/
+        //if (flag == '0'){
+            $(item).find("span").toggleClass("glyphicon-chevron-down");
+            $(item).find("span").toggleClass("glyphicon-chevron-up");
+        //};
+        //设置当前菜单为选中状态
+        $(item).addClass("active");
+    };
+</script>
+{% endblock %}
+
+
+</html>

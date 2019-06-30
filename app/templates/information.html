@@ -1,0 +1,394 @@
+<!-- 主体内容 -->
+{% block content %}
+<!-- 数据表 -->
+<div class=table-responsive">   <!-- 自适应列宽，高度  -->
+    <table id="table_apply" class="table table-bordered table-striped table-condensed text-nowrap"></table>
+</div>
+<!-- 工具容器 -->
+<div id="toolbar">
+    {% block function %}
+    <button type="button" class="btn btn-primary btn-sm" id="database_add">新增</button>
+    <button type="button" class="btn btn-primary btn-sm" id="database_edit">修改</button>
+    <button type="button" class="btn btn-primary btn-sm" id="database_delete">删除</button>
+    {% endblock %}
+</div>
+
+{% block modal %}
+<!-- 删除确认窗 -->
+<div class="modal fade" id="modal_delete" tabindex="-1" role="dialog" aria-labelledby="modal_delete_label" aria-hidden="true"
+data-backdrop="false" data-keyboard="false">
+    <div class="modal-dialog" style="width: 300px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="modal_delete_label">删除数据确认提示窗</h4>
+            </div>
+            <div class="modal-body">
+                <p>确认要删除所勾选数据吗？</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-success btn-sm" id="delete_confirm">确定</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+<!-- 模态框 新增、编辑窗 -->
+<div class="modal fade" id="modal_apply" tabindex="-1" role="dialog" aria-labelledby="modal_base_label" aria-hidden="true"
+                data-backdrop="false" data-keyboard="false">
+    <div class="modal-dialog" style="width: 400px">
+        <form class="form-horizontal" role="form" method="post"  onsubmit="return false">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="modal_base_label">{{ modal_title }}</h4>
+            </div>
+            <div class="modal-body">
+                    {{ form.hidden_tag() }}
+                    {% for field in form if field.widget.input_type !='hidden' %}
+                    <div class="form-group">
+                        <label for="{{ field.widget.id }}" class="col-md-4 col-xs-4 control-label">{{ field.label }}</label>
+                        <div class="col-md-7 col-xs-6">{{ field|safe }}</div>
+                        <div class="col-md-1 col-xs-2">
+                            {% if field.errors %}
+                                <ul class=errors>
+                                {% for error in field.errors %}
+                                  <li>{{ error }}</li>
+                                {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">取消</button>
+                <button type="submit" class="btn btn-primary btn-sm" id="modal_save">确定</button>
+            </div>
+        </div><!-- /.modal-content -->
+        </form>
+    </div><!-- /.modal -->
+</div>
+{% endblock %}
+{% endblock %}
+
+{% block script %}
+
+<script>
+$(function(){
+    $('.modal').draggable();   //实现模态框拖移
+    //提示信息插件 显示位置设置
+    toastr.options.positionClass = 'toast-top-center';    //如toast-bottom-right表示下右、toast-bottom-center表示下中、toast-top-center表示上中等
+    //所有下拉控件的初始化
+    $('select').selectpicker({
+        //liveSearch:true,
+        container: "body",
+        width: 200,
+        size: 5
+    });
+    //模态框 日期控件的初始化
+    var date_list = ['info_birthday','info_workdate'];
+    $.each(date_list, function(i, item){
+        $("#" + item).datepicker({
+            language: "zh-CN",
+            autoclose: true,//选中之后自动隐藏日期选择框
+            clearBtn: true,//清除按钮
+            todayBtn: 'linked',//今日按钮
+            todayHighlight: true,
+            //toggleActive: true,
+            format: "yyyy-mm-dd"//日期格式，
+        })
+    });
+
+});
+</script>
+<!-- 表格初始化 -->
+<script>
+var action = '';  //保存操作状态
+var cur_key = '';  //当前选中的主键值
+//表格初始化
+initTable('/holiday/api/v1.0/information');
+//表格初始化
+function initTable(url) {
+    // 删除表格定义   如缺少会导致显示内容列下拉选择无效
+    $("#table_apply").bootstrapTable('destroy');
+    $("#table_apply").bootstrapTable({
+        //表格高度
+        //height: getHeight()-300,
+        //服务器数据的请求方式 'get' 或 'post'。
+        method: 'get',
+        //设置为 true 会有隔行变色效果
+        striped: true,
+        //设置为 true 会在表格底部显示分页条。
+        pagination: true,
+        //请求后台的URL
+        url: url,
+        //服务器返回的数据类型。
+        dataType: 'json',
+        //工具按钮用哪个容器
+        toolbar: '#toolbar',
+        //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性
+        cache: false,
+        //设置为 true 启用分页条无限循环的功能
+        paginationLoop: false,
+        //设置在哪里进行分页，可选值为 'client' 或者 'server'。设置 'server'时，必须设置服务器数据地址（url）或者重写ajax方法
+        sidePagination: 'client',
+        //初始化加载第一页，默认第一页
+        pageNumber: 1,
+        //每页的记录行数
+        pageSize: 10,
+        //可供选择的每页的行数
+        pageList: [5,10,15,20, 50, 100],
+        //设置为false 将禁止所有列的排序。
+        sortable: true,
+        //设置默认排序为 name
+        sortName: 'id',
+        //定义排序方式，'asc' 或者 'desc'。
+        sortOrder: "desc",
+        //是否显示刷新按钮
+        showRefresh: true,
+        //是否显示内容列下拉框。
+        showColumns: true,
+        //显示导出插件
+        showExport: true,
+        exportDataType: "basic",
+        //是否显示右上角的搜索框
+        search: true,
+        //是否启用点击选中行
+        clickToSelect: false,
+        uniqueId: "id",                     //每一行的唯一标识，一般为主键列
+        showToggle: false,                   //是否显示详细视图和列表视图的切换按钮
+        cardView: false,                    //是否显示详细视图
+        detailView: false,                  //是否显示父子表
+        //设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder
+        //设置为limit可以获取limit, offset, search, sort, order
+        queryParamsType:'limit',
+        searchOnEnterKey: false,
+        //请求服务器数据
+        queryParams: function queryParams(params){
+            var param = {
+                limit: params.limit,
+                offset: params.offset,
+                search: params.search,
+                sort: params.sort,
+                order: params.order,
+                sidePagination: 'client'
+            };
+            return param;
+        },
+        //加载成功时执行
+        onLoadSuccess: function(data){
+            console.log("加载成功");
+        },
+        //加载失败时执行
+        onLoadError: function(status){
+            console.log("加载数据失败"+status);
+        },
+        onCheck: function(row,$element){
+            cur_key = row.id;
+        },
+        columns: [
+            {
+                title: "全选",
+                field: "select",
+                checkbox: true,
+                width: 20,//宽度
+                //align: "center",//水平
+                //valign: "middle",
+                formatter: function (value, row, index) {
+                return row._id;
+            }
+            },{
+                field: 'id',
+                title: '序号',
+                align: 'left',
+                valign: 'middle',
+                sortable: true
+            },
+            {
+                field: 'info_code',
+                title: '编号',
+                align: 'left',
+                valign: 'middle',
+                sortable: true
+            },
+            {
+                field: 'info_name',
+                title: '姓名',
+                align: 'left',
+                valign: 'middle',
+                sortable: true
+            },
+            {
+                field: 'info_sex',
+                title: '性别',
+                align: 'left',
+                valign: 'middle',
+                sortable: true,
+                formatter: function (value, row, index) {
+                    if (value == '0' ){
+                        value = '男'}
+                    else if(value == '1'){
+                        value = '女'}
+                    else if(value == '2'){
+                        value = '未知'}
+                    return value
+                }
+            },
+            {
+                field: 'info_birthday',
+                title: '出生日期',
+                align: 'left',
+                valign: 'middle',
+                sortable: true
+            },
+            {
+                field: 'info_department',
+                title: '科室',
+                align: 'left',
+                valign: 'middle',
+                sortable: true,
+                formatter: function (value, row, index) {
+                    if (value == '0' ){
+                        value = '(新阳)网络信息科'}
+                    else if(value == '1'){
+                        value = '(厢竹)网络信息科'}
+                    return value
+                }
+            },
+            {
+                field: 'info_workdate',
+                title: '入职日期',
+                align: 'left',
+                valign: 'middle',
+                sortable: true
+            },
+            {
+                field: 'info_title',
+                title: '职称',
+                align: 'left',
+                valign: 'middle',
+                sortable: true,
+                formatter: function (value, row, index) {
+                    if (value == '0' ){
+                        value = '助理工程师'}
+                    else if(value == '1'){
+                        value = '程序员'}
+                    else if(value == '2'){
+                        value = '网络管理员'}
+                    else if(value == '3'){
+                        value = '网络工程师'}
+                    return value
+                }
+            }
+        ]
+    });
+};
+</script>
+<!-- 数据提交 -->
+<script>
+    //将提交的表单数值序列化为JSON对象
+    function get_json_data(){
+        var d = {};
+    var t = $('form').serializeArray();
+    $.each(t, function() {
+      d[this.name] = this.value;
+    });
+    //alert(JSON.stringify(d));
+        return d;
+    };
+    //提交表单数据到服务器
+    function ajax_post_data(url, data){
+         $.ajax({
+				type: "POST",
+				dataType: "json",
+				url: url,
+				data: data,  //json对象，非json字符串
+				timeout: 30000,
+				error: function(request) {
+				    toastr.error('提交数据失败！');
+					//alert("Connection error:"+request.error);
+				},
+				success: function(data) {
+				    $(".modal").modal("hide");     //隐藏模态框
+                    $("#table_apply").bootstrapTable("refresh");  //刷新表格数据
+                    $("form")[0].reset();  //重置表单
+				    toastr.success('提交数据成功');
+				}
+		 })
+    };
+</script>
+<!-- 操作按钮事件 -->
+<script>
+    $("#database_add").click(function(){
+        action = 'add';
+        $("#modal_apply").modal("show");
+    });
+    $("#database_edit").click(function(){
+        action = 'edit';
+        var row = $("#table_apply").bootstrapTable('getSelections');
+        if (row.length == 1){
+            $("#modal_apply").modal("show");
+        }else{ toastr.info('只能选择一行进行【编辑】！');}
+    });
+    $("#database_delete").click(function(){
+        action = 'delete';
+        var row = $("#table_apply").bootstrapTable('getSelections');
+        if (row.length == 1){
+            $("#modal_delete").modal("show");
+        }else{ toastr.info('只能选择一行进行【删除】！');}
+    });
+</script>
+<!-- 模态框相关事件 -->
+<script>
+    function InitModalAddForm(){
+        if (action == 'add'){
+            //清除文本框的值,包含隐藏input
+            $("#modal_apply input").val("");
+            //清除模态框的选择框的值
+            $('#modal_apply .select').selectpicker("val","");
+        }
+        else if (action == 'edit'){
+            var row = $("#table_apply").bootstrapTable('getSelections');
+            //alert(JSON.stringify(row[0]));
+            if (row.length == 1){
+                var edit_date = row[0];
+                $("#modal_apply input").each(function(){
+                    $(this).val(edit_date[$(this).attr("id")]);
+                });
+                $('#modal_apply select').each(function(item){
+                    $(this).selectpicker("val",edit_date[$(this).attr("id")]);
+                });
+            };
+        };
+    };
+
+    $("#modal_apply").on('shown.bs.modal', function () {
+        //初始化新增界面
+        InitModalAddForm();
+    });
+
+</script>
+<!-- 模态框按钮事件 -->
+<script type="text/javascript">
+    $("#delete_confirm").click(function(){
+         if (action == 'delete'){
+             url = '/holiday/api/v1.0/information/delete/' + cur_key
+             ajax_post_data(url, {});
+         };
+    });
+    //新增，编辑根据post的url来区别
+    $("#modal_save").click(function(e) {
+        if ($("#info_code").val() && $("#info_name").val() && $("#info_sex").val() && $("#info_birthday").val()
+        && $("#info_department").val() && $("#info_workdate").val() && $("#info_title").val()){
+            e.preventDefault();
+            if (action == 'add'){
+                url = '/holiday/api/v1.0/information/add';
+            } else if (action == 'edit'){
+                url = '/holiday/api/v1.0/information/edit/' + cur_key;
+            }else{url = ''};
+            ajax_post_data(url, get_json_data());
+        }
+    });
+</script>
+{% endblock %}

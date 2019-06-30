@@ -1,0 +1,272 @@
+<!-- 主体内容 -->
+{% block content %}
+<!-- 搜素面板 -->
+<div class="panel panel-default">
+    <div class="panel-heading">
+    <a data-toggle="collapse" data-parent="#accordion"  href="#pn_query">
+        显示/隐藏查询框<span class="caret"></span>  <!-- 下拉符号 -->
+    </a></div>
+    <div id="pn_query" class="panel-collapse collapse in table-responsive" style="margin-top:10px; margin-bottom:10px">
+        <div class="table table-condensed">
+            <table>
+            <tr>
+                <td style=" white-space:nowrap; border:0px;"><label class="control-label">公休年份</label></td>
+                <td style=" white-space:nowrap;border:0px;"><input type="text" class="form-control input-sm" style="width: 80px" id="query_year"></td>
+                <td>&#12288;&#12288;</td>
+                <td style=" white-space:nowrap; border:0px;"><label class="control-label" for="apply_dept">科室</label></td>
+                <td style=" white-space:nowrap; border:0px;"><select type="text" class="form-control select-sm" style="width: 140px" id="apply_dept">
+                    <option value="">全部</option>
+                    <option value="(新阳)网络信息科">(新阳)网络信息科</option>
+                    <option value="(厢竹)网络信息科">(厢竹)网络信息科</option>
+                </select></td>
+                <td>&#12288;&#12288;</td>
+                <td style=" white-space:nowrap; border:0px;"><label class="control-label" for="apply_man">姓名</label></td>
+                <td style=" white-space:nowrap; border:0px;"><input type="text" class="form-control input-sm" style="width: 80px" id="apply_man"></td>
+                <td>&#12288;&#12288;</td>
+                <td><button class="btn btn-primary btn-sm" id="btn_query">查询</button></td>
+                <td>&#12288;</td>
+                <td><button class="btn btn-primary btn-sm" id="btn_reset">重置</button></td>
+            </tr>
+            </table>
+        </div>
+        <div style="display: none;"><input type="text" id="query_list"></div>
+    </div>
+</div>
+<!-- 数据表 -->
+<div class=table-responsive">   <!-- 自适应列宽，高度  -->
+    <table id="table_apply" class="table table-bordered table-striped table-condensed text-nowrap"></table>
+</div>
+{% endblock %}
+
+{% block script %}
+
+<script>
+$(function(){
+    //提示信息插件 显示位置设置
+    toastr.options.positionClass = 'toast-top-center';    //如toast-bottom-right表示下右、toast-bottom-center表示下中、toast-top-center表示上中等
+    //所有下拉控件的初始化
+    $('select').selectpicker({
+        //liveSearch:true,
+        container: "body",
+        //width: 120,
+        size: 5
+    });
+    //日期控件的初始化
+    $("#query_year").datepicker({
+        language: "zh-CN",
+        minViewMode: 2,
+        autoclose: true,//选中之后自动隐藏日期选择框
+        clearBtn: true,//清除按钮
+        //todayBtn: 'linked',//今日按钮
+        //todayHighlight: true,
+        //toggleActive: true,
+        format: "yyyy"//日期格式，
+    });
+
+    $("#btn_query").on("click",function(){
+        if(!$("#query_year").val()){
+            toastr.info('请选择需要统计的公休年份！');
+            $("#query_year").focus();
+        }else
+        {
+            var query_str = ' 1=1 ';
+            var query_year = $("#query_year").val();
+            var apply_dept = $("#apply_dept").val();
+            var apply_man = $("#apply_man").val();
+            if(query_year){
+                query_str ='left(start_date,4) = "' + query_year + '"';
+            }
+            //if(apply_dept){
+            //    query_str = query_str + ' and apply_dept = "' + apply_dept + '"';
+            //}
+            if(apply_man){
+               query_str = query_str + ' and apply_man like "%' + apply_man + '%"';
+            }
+
+            //alert(query_str);
+            $("#query_list").val(query_str);
+            initTable('/holiday/api/v1.0/holiday_days');
+        }
+    });
+     $("#btn_reset").on("click",function(){
+         //清除文本框的值,包含隐藏input
+        $("#pn_query input").val("");
+        //清除选择框的值
+        $('#pn_query select').val("");
+        $('#pn_query select').selectpicker("val","");
+     });
+});
+</script>
+<!-- 表格初始化 -->
+<script>
+var action = '';  //保存操作状态
+var cur_key = '';  //当前选中的主键值
+//表格初始化
+//initTable('/holiday/api/v1.0/holiday_apply');
+//表格初始化
+function initTable(url) {
+    // 删除表格定义   如缺少会导致显示内容列下拉选择无效
+    $("#table_apply").bootstrapTable('destroy');
+    $("#table_apply").bootstrapTable({
+        //表格高度
+        //height: getHeight()-300,
+        //服务器数据的请求方式 'get' 或 'post'。
+        method: 'get',
+        //设置为 true 会有隔行变色效果
+        striped: true,
+        //设置为 true 会在表格底部显示分页条。
+        pagination: true,
+        //请求后台的URL
+        url: url,
+        //服务器返回的数据类型。
+        dataType: 'json',
+        //工具按钮用哪个容器
+        toolbar: '#toolbar',
+        //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性
+        cache: false,
+        //设置为 true 启用分页条无限循环的功能
+        paginationLoop: false,
+        //设置在哪里进行分页，可选值为 'client' 或者 'server'。设置 'server'时，必须设置服务器数据地址（url）或者重写ajax方法
+        sidePagination: 'client',
+        //初始化加载第一页，默认第一页
+        pageNumber: 1,
+        //每页的记录行数
+        pageSize: 10,
+        //可供选择的每页的行数
+        pageList: [5,10,15,20, 50, 100],
+        //设置为false 将禁止所有列的排序。
+        sortable: true,
+        //设置默认排序为 name
+        sortName: 'id',
+        //定义排序方式，'asc' 或者 'desc'。
+        sortOrder: "desc",
+        //是否显示刷新按钮
+        showRefresh: true,
+        //是否显示内容列下拉框。
+        showColumns: true,
+        //显示导出插件
+        showExport: true,
+        exportDataType: "basic",
+        //是否显示右上角的搜索框
+        search: true,
+        //是否启用点击选中行
+        clickToSelect: false,
+        uniqueId: "id",                     //每一行的唯一标识，一般为主键列
+        showToggle: false,                   //是否显示详细视图和列表视图的切换按钮
+        cardView: false,                    //是否显示详细视图
+        detailView: false,                  //是否显示父子表
+        //设置为undefined可以获取pageNumber，pageSize，searchText，sortName，sortOrder
+        //设置为limit可以获取limit, offset, search, sort, order
+        queryParamsType:'limit',
+        searchOnEnterKey: false,
+        //请求服务器数据
+        queryParams: function queryParams(params){
+            var param = {
+                limit: params.limit,
+                offset: params.offset,
+                search: params.search,
+                sort: params.sort,
+                order: params.order,
+                sidePagination: 'client',
+                department: $("#apply_dept").val(),
+                querystr: $("#query_list").val()
+            };
+            return param;
+        },
+        //加载成功时执行
+        onLoadSuccess: function(data){
+            console.log("加载成功");
+        },
+        //加载失败时执行
+        onLoadError: function(status){
+            console.log("加载数据失败"+status);
+        },
+        onCheck: function(row,$element){
+            cur_key = row.id;
+        },
+        columns: [
+            {
+                field: 'holiday_year',
+                title: '年份',
+                align: 'left',
+                valign: 'middle',
+                sortable: true,
+                formatter: function (value, row, index) {
+                    return $("#query_year").val();
+                }
+            },
+            {
+                field: 'apply_dept',
+                title: '科室',
+                align: 'left',
+                valign: 'middle',
+                sortable: true
+            },
+            {
+                field: 'apply_man',
+                title: '申请人',
+                align: 'left',
+                valign: 'middle',
+                sortable: true
+            },
+            {
+                field: 'holiday_total',
+                title: '公休总天数',
+                align: 'left',
+                valign: 'middle',
+                sortable: true
+            },
+            {
+                field: 'holiday_used',
+                title: '已用的公休天数',
+                align: 'left',
+                valign: 'middle',
+                sortable: true
+            },
+            {
+                field: 'holiday_left',
+                title: '可用的公休天数',
+                align: 'left',
+                valign: 'middle',
+                sortable: true
+            }
+        ]
+    });
+};
+</script>
+<!-- 数据提交 -->
+<script>
+    //将提交的表单数值序列化为JSON对象
+    function get_json_data(){
+        var d = {};
+    var t = $('form').serializeArray();
+    $.each(t, function() {
+      d[this.name] = this.value;
+    });
+    //alert(JSON.stringify(d));
+        return d;
+    };
+    //提交表单数据到服务器
+    function ajax_post_data(url, data){
+         $.ajax({
+				type: "POST",
+				dataType: "json",
+				url: url,
+				data: data,  //json对象，非json字符串
+				timeout: 30000,
+				error: function(request) {
+				    toastr.error('提交数据失败！');
+					//alert("Connection error:"+request.error);
+				},
+				success: function(data) {
+				    $(".modal").modal("hide");     //隐藏模态框
+                    $("#table_apply").bootstrapTable("refresh");  //刷新表格数据
+                    $("form")[0].reset();  //重置表单
+				    toastr.success('提交数据成功');
+				}
+		 })
+    };
+</script>
+
+
+{% endblock %}
