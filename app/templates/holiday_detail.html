@@ -117,7 +117,9 @@ $(function(){
             var holiday_type = $("#holiday_type").val();
             var audit_status = $("#audit_status").val();
             if(start_date && end_date){
-                query_str ='((left(start_date,7) >= "' + start_date + '" and left(start_date,7) <= "' + end_date +'") or (left(end_date,7) >= "' + start_date + '" and left(end_date,7) <= "' + end_date + '"))';
+                query_str ='((left(start_date,7) >= "' + start_date + '" and left(start_date,7) <= "' + end_date +'") '
+                    + 'or (left(end_date,7) >= "' + start_date + '" and left(end_date,7) <= "' + end_date +'") '
+                    + 'or (left(start_date,7) <= "' + start_date + '" and left(end_date,7) >= "' + end_date + '"))';
             }
             if(apply_dept){
                 query_str = query_str + ' and apply_dept = "' + apply_dept + '"';

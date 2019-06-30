@@ -322,8 +322,10 @@ def get_holiday_statiscal():
 
 @app.route('/holiday/api/v1.0/holiday_days', methods=['GET'])
 def get_holiday_days():
-    querystr = request.args.get("querystr", ' 1=1 ')
+    # querystr = request.args.get("querystr", ' 1=1 ')
     department = request.args.get("department", '')
+    apply_man = request.args.get("apply_man", '')
+    holiday_year = request.args.get("holiday_year", '')
     sort = request.args.get('sort', 'id')
     order = request.args.get('order', 'asc')
     sidePagination = request.args.get('sidePagination', 'client')
@@ -334,12 +336,15 @@ def get_holiday_days():
         pass
     else:
         # 公休天数统计
+        query_str1 = '1=1'
+        query_str2 = "audit_status='1' and holiday_type = '公休' and left(start_date,4) = '%s'" % holiday_year
         if department:
-            deptstr = "info_department = '%s'" % department
-            querystr = "audit_status='1' and holiday_type = '公休' and %s and '%s'" % (querystr, department)
-        else:
-            deptstr = ' 1=1 '
-            querystr = "audit_status='1' and holiday_type = '公休' and %s" % querystr
+            query_str1 = "info_department = '%s'" % department
+            query_str2 = query_str2 + " and apply_dept = '%s'" % department
+        if apply_man:
+            query_str1 = query_str1 + " and info_name like '%%%s%%'" % apply_man
+            query_str2 = query_str2 + " and apply_man like '%%%s%%'" % apply_man
+
         # querystr = "audit_status='1' and holiday_type = '公休' and %s " % querystr
         sql_str = 'select info_department, info_name, holiday_total, ifnull(holiday_used,0) as holiday_used, (holiday_total - ifnull(holiday_used,0)) as holiday_left  from(' \
                   'select info_department, info_name, case when YEAR(NOW())-left(info_workdate, 4) >=1 and YEAR(NOW())-left(info_workdate, 4) < 10 then 5 ' \
@@ -351,7 +356,7 @@ def get_holiday_days():
                   'where %s ' \
                   'group by apply_dept, apply_man, holiday_type) as t2 ' \
                   'on t2.apply_dept = t1.info_department and t2.apply_man = t1.info_name' \
-                  ' order by info_department, info_name;' % (deptstr, querystr)
+                  ' order by info_department, info_name;' % (query_str1, query_str2)
         print(sql_str)
         # sqlalchemy执行sql
         data_query = db.session.execute(sql_str)
