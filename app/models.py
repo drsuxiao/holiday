@@ -1,13 +1,13 @@
 from passlib.apps import custom_app_context as pwd_context
 from datetime import datetime
 from app import db
+from flask_login import UserMixin, current_user
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    usercode = db.Column(db.String(10), unique=True, index=True)
-    username = db.Column(db.String(32), index=True)
+    username = db.Column(db.String(32), unique=True, index=True)
     password_hash = db.Column(db.String(128))
 
     def hash_password(self, password):
@@ -22,7 +22,6 @@ class User(db.Model):
         """
         json_user = {
             'id': self.id,
-            'usercode': self.usercode,
             'username': self.username,
             'password': self.password_hash
         }

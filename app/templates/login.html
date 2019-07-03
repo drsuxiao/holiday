@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="{{url_for('static', filename='css/bootstrap.min.css')}}" rel="stylesheet" type="text/css"/>
+    <link href="{{url_for('static', filename='css/login.css')}}" rel="stylesheet" type="text/css"/>
+    <script src="{{url_for('static', filename='js/jquery.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/jquery-ui.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/bootstrap.min.3.3.js')}}"></script>
+    <title>考勤登记系统</title>
+    <div class="navbar" role="navigation"  style="background-color: #dedef8;">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle"
+                data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">考勤登记系统</a>
+            </div>
+            {% block access_control %}
+            {% if current_user.is_authenticated %}
+            <div class="btn-group pull-right">
+                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                    <i class="icon-user"></i> {{ current_user.username }} <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="{{url_for('admin.password_edit')}}">修改密码</a></li>
+                    <li><a href="{{ url_for('admin.logout_view') }}">注销用户</a></li>
+                </ul>
+            </div>
+            {% endif %}
+            {% endblock %}
+
+        </div>
+    </div>
+</head>
+<body class="form-bg">
+   <!-- <div class="container">
+        <div class="row">
+            <div>
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% endwith %}
+                <form role="form" method="post">
+                    {{ form.hidden_tag() }}
+                    <p>
+                        {{ form.username.label }}<br>
+                        {{ form.username(size=32) }}<br>
+                        {% for error in form.username.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </p>
+                    <p>
+                        {{ form.password.label }}<br>
+                        {{ form.password(size=32) }}<br>
+                        {% for error in form.password.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </p>
+                    <!--<p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
+                    <p>{{ form.submit() }}</p>
+                </form>
+            </div>
+        </div>
+    </div>-->
+    <div class="container">
+        <div class="row">
+            <div class="col-md-offset-3 col-md-6">
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% endwith %}
+                <form class="form-horizontal" role="form" method="post">
+                    {{ form.hidden_tag() }}
+                    <span class="heading">用户登录</span>
+                    <div class="form-group">
+                        {{ form.username(size=32) }}
+                        <i class="fa fa-user"></i>
+                    </div>
+                    <div class="form-group help">
+                        {{ form.password(size=32) }}<br>
+                        <i class="fa fa-lock"></i>
+                        <a href="#" class="fa fa-question-circle"></a>
+                    </div>
+                    <div class="form-group">
+                        <div class="main-checkbox">
+                            <input type="checkbox" value="None" id="checkbox1" name="check"/>
+                            <label for="checkbox1"></label>
+                        </div>
+                        <span class="text">Remember me</span>
+                        <button type="submit" class="btn btn-default">登录</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

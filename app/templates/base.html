@@ -26,19 +26,22 @@
 
         <!-- 顶部导航菜单 -->
     {% block navbar %}
-    <div class="navbar navbar-inverse" role="navigation">
+    <div class="navbar" role="navigation" style="background-color: #dedef8;">
         <div class="container-fluid">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle"
-                data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
+            <div >
                 <a class="navbar-brand" href="#">考勤登记系统</a>
             </div>
-
+            {% if current_user.is_authenticated %}
+            <div class="btn-group pull-right">
+                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                    <i class="icon-user"></i>当前用户：{{ current_user.username }} <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="#">修改密码</a></li>
+                    <li><a href="{{ url_for('logout') }}">注销用户</a></li>
+                </ul>
+            </div>
+            {% endif %}
         </div>
     </div>
     {% endblock %}
@@ -57,7 +60,9 @@
                             </a>
                             <div class="collapse" id="p1">
                                 <a class="list-group-item" href="{{ url_for('show_apply') }}">&#12288;&#12288;请假申请</a>
+                                {% if current_user.username == 'admin' or current_user.username == '003314' %}
                                 <a class="list-group-item" href="{{ url_for('show_audit') }}">&#12288;&#12288;请假审核</a>
+                                {% endif %}
                                 <a class="list-group-item" href="{{ url_for('show_information') }}">&#12288;&#12288;个人信息</a>
                                <!-- <a class="list-group-item" href="#">&#12288;&#12288;密码修改</a> -->
                             </div>

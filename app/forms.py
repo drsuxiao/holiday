@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField
+from wtforms import StringField, SelectField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired, Length
 from app.models import HolidayApply, PersonalInformation
 
@@ -53,3 +53,11 @@ class PersonalInformationForm(FlaskForm):
         self.info_sex.choices = [('0', '男'), ('1', '女'), ('2', '未知')]
         self.info_department.choices = [('(新阳)网络信息科', '(新阳)网络信息科'), ('(厢竹)网络信息科', '(厢竹)网络信息科')]
         self.info_title.choices = [('0', '助理工程师'), ('1', '程序员'), ('2', '网络管理员'), ('3', '网络工程师')]
+
+
+class LoginForm(FlaskForm):
+    username = StringField('用户名', validators=[DataRequired()], render_kw={'class': "form-control input-sm", 'placeholder': "用户名"})
+    password = PasswordField('密码', render_kw={'class': "form-control input-sm", 'placeholder': "密码"})
+    remember_me = BooleanField('记住密码')
+    submit = SubmitField('登录')
+

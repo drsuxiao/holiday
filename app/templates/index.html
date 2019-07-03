@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="{{url_for('static', filename='css/bootstrap.min.css')}}" rel="stylesheet" type="text/css"/>
+    <script src="{{url_for('static', filename='js/jquery.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/jquery-ui.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/bootstrap.min.3.3.js')}}"></script>
+    <title>Title</title>
+    <div class="navbar navbar-inverse" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle"
+                data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">考勤登记系统</a>
+            </div>
+            {% block access_control %}
+            {% if current_user.is_authenticated %}
+            <div class="btn-group pull-right">
+                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                    <i class="icon-user"></i> {{ current_user.username }} <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="{{url_for('admin.password_edit')}}">修改密码</a></li>
+                    <li><a href="{{ url_for('admin.logout_view') }}">注销用户</a></li>
+                </ul>
+            </div>
+            {% endif %}
+            {% endblock %}
+
+        </div>
+    </div>
+</head>
+<body>
+    <div>
+        请先登录系统：
+        </div>
+        <hr>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+</body>
+</html>
