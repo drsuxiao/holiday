@@ -52,7 +52,7 @@ class PersonalInformationForm(FlaskForm):
         super(PersonalInformationForm, self).__init__(*args, **kwargs)
         self.info_sex.choices = [('0', '男'), ('1', '女'), ('2', '未知')]
         self.info_department.choices = [('(新阳)网络信息科', '(新阳)网络信息科'), ('(厢竹)网络信息科', '(厢竹)网络信息科')]
-        self.info_title.choices = [('0', '助理工程师'), ('1', '程序员'), ('2', '网络管理员'), ('3', '网络工程师')]
+        self.info_title.choices = [('0', '助理工程师'), ('1', '程序员'), ('2', '网络管理员'), ('3', '网络工程师'), ('4', '其它职称')]
 
 
 class LoginForm(FlaskForm):

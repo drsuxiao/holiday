@@ -368,3 +368,106 @@ def get_holiday_days():
                  "holiday_used": row['holiday_used'], "holiday_left": row['holiday_left']} for row in rows]
 
     return myreponse(data, total)
+
+
+@app.route('/holiday/api/v1.0/users', methods=['GET'])
+def get_users():
+    querystr = request.args.get("querystr", '')
+    querytype = request.args.get("querytype", 'json')
+    offset = request.args.get("offset", '0')
+    limit = request.args.get("limit", '10')
+    sort = request.args.get('sort', 'id')
+    order = request.args.get('order', 'desc')
+    sidePagination = request.args.get('sidePagination', 'client')
+
+    if querytype == 'string':
+        wherestr = querystr
+    else:
+        wherestr = "1=1"
+    print(wherestr)
+
+    orderbystr = sort + " " + order
+    print(orderbystr)
+    # 分页paginate的参数page，是第几页，而offset是记录的偏移量，需要转换
+    # 表格标题排序，根据table提交的信息进行排序，否则排序无效
+    if sidePagination == 'server':
+        page = (int(offset) // int(limit)) + 1
+        pagination = PersonalInformation.query.filter(text(wherestr)).order_by(text(orderbystr)).paginate(page, int(limit), False)
+        rows = pagination.items
+        total = pagination.total
+    else:
+        rows = PersonalInformation.query.filter(text(wherestr)).order_by(text(orderbystr))
+        total = PersonalInformation.query.filter(text(wherestr)).order_by(text(orderbystr)).count()
+    print(total)
+
+    if not rows:
+        abort(400)
+    data = [row.to_json() for row in rows]
+    # data = get_data_by_model(EquipmentRepair)
+    return myreponse(data, total)
+
+
+@app.route('/holiday/api/v1.0/users/add', methods=['POST'])
+def new_user():
+    data = request.form
+    data_dict = data.to_dict()
+    print(data_dict)
+
+    info_code = data_dict.get('info_code')
+    info_name = data_dict.get('info_name')
+    info_sex = data_dict.get('info_sex')
+    info_birthday = data_dict.get('info_birthday')
+    info_department = data_dict.get('info_department')
+    info_workdate = data_dict.get('info_workdate')
+    info_title = data_dict.get('info_title')
+
+    if PersonalInformation.query.filter_by(info_code=info_code).first() is not None:
+        abort(400)  # existing user
+
+    row = PersonalInformation(info_code=info_code, info_name=info_name, info_sex=info_sex, info_birthday=info_birthday,
+                              info_department=info_department, info_workdate=info_workdate, info_title=info_title)
+    db.session.add(row)
+    db.session.commit()
+
+    return myreponse(row.to_json())
+
+
+@app.route('/holiday/api/v1.0/users/edit/<int:id>', methods=['POST'])
+def update_user(id):
+    row = PersonalInformation.query.filter_by(id=id).first()
+    if row is None:
+        abort(400)  # existing user
+
+    data = request.form
+    data_dict = data.to_dict()
+    print(data_dict)
+
+    info_code = data_dict.get('info_code')
+    info_name = data_dict.get('info_name')
+    info_sex = data_dict.get('info_sex')
+    info_birthday = data_dict.get('info_birthday')
+    info_department = data_dict.get('info_department')
+    info_workdate = data_dict.get('info_workdate')
+    info_title = data_dict.get('info_title')
+
+    row.info_code = info_code
+    row.info_name = info_name
+    row.info_sex = info_sex
+    row.info_birthday = info_birthday
+    row.info_department = info_department
+    row.info_workdate = info_workdate
+    row.info_title = info_title
+
+    db.session.commit()
+    return myreponse(row.to_json())
+
+
+@app.route('/holiday/api/v1.0/users/delete/<int:id>', methods=['POST'])
+def delete_user(id):
+    row = PersonalInformation.query.filter_by(id=id).first()
+    if row is None:
+        abort(404)  # existing user
+
+    db.session.delete(row)
+    db.session.commit()
+    return myreponse(row.to_json())
