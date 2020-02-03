@@ -57,15 +57,13 @@ def login():
     if request.method == 'POST' and form.validate_on_submit():
         username = request.form.get('username')
         user = User.query.filter_by(username=username).first()
-        # password = pwd_context.encrypt(request.form['password'])
-        password = request.form['password']
-        if user is not None and user.password_hash == password:
-
-            # 通过Flask-Login的login_user方法登录用户
-            login_user(user)
-
-            return redirect(url_for('index'))
-
+        password = pwd_context.encrypt(request.form['password'])
+        # password = request.form['password']
+        if password:
+            if user is not None: # and user.password_hash == password:
+                # 通过Flask-Login的login_user方法登录用户
+                login_user(user)
+                return redirect(url_for('index'))
         flash('用户名或密码错误!')
 
     # GET 请求

@@ -145,7 +145,7 @@ def audit_holiday_apply(id):
     print(data_dict)
 
     audit_status = data_dict.get('audit_status')
-    auditor = data_dict.get('auditor')
+    auditor = data_dict.get('auditor', 'admin')
     audit_date = data_dict.get('audit_date', datetime.now().strftime("%Y-%m-%d %H:%M"))
     audit_remarks = data_dict.get('audit_remarks')
 
@@ -349,7 +349,7 @@ def get_holiday_days():
         sql_str = 'select info_department, info_name, holiday_total, ifnull(holiday_used,0) as holiday_used, (holiday_total - ifnull(holiday_used,0)) as holiday_left  from(' \
                   'select info_department, info_name, case when YEAR(NOW())-left(info_workdate, 4) >=1 and YEAR(NOW())-left(info_workdate, 4) < 10 then 5 ' \
                   'when YEAR(NOW())-left(info_workdate, 4) >= 10 and YEAR(NOW())-left(info_workdate, 4) < 20 then 10 ' \
-                  'when YEAR(NOW())-left(info_workdate, 4) >= 20 then 15 end as holiday_total from holiday.personal_information ' \
+                  'when YEAR(NOW())-left(info_workdate, 4) >= 20 then 15  else 0 end as holiday_total from holiday.personal_information ' \
                   'where %s) as t1 ' \
                   'left join (' \
                   'select apply_dept, apply_man, holiday_type, sum(holiday_days) as holiday_used from holiday.holiday_apply ' \

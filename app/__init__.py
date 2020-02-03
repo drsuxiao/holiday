@@ -3,7 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user
 # from flask_bootstrap import Bootstrap
 
-app = Flask(__name__)
+# app = Flask(__name__)
+app = Flask(__name__, instance_relative_config=True)
 # 导入指定的配置对象
 app.config.from_object('config')
 db = SQLAlchemy(app)

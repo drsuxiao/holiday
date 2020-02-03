@@ -23,7 +23,7 @@ class HolidayApplyForm(FlaskForm):
     # 在构造化Form实例时指定selectField的choices内容,
     def __init__(self, *args, **kwargs):
         super(HolidayApplyForm, self).__init__(*args, **kwargs)
-        self.holiday_type.choices = [('公休', '公休'), ('病假', '病假'), ('事假', '事假'), ('婚假', '婚假'), ('产假', '产假'), ('陪产假', '陪产假'), ('探亲假', '探亲假'), ('丧假', '丧假')]
+        self.holiday_type.choices = [('公休', '公休'), ('补休', '补休'), ('病假', '病假'), ('事假', '事假'), ('婚假', '婚假'), ('产假', '产假'), ('陪产假', '陪产假'), ('探亲假', '探亲假'), ('丧假', '丧假')]
         self.apply_dept.choices = [('(新阳)网络信息科', '(新阳)网络信息科'), ('(厢竹)网络信息科', '(厢竹)网络信息科')]
         self.apply_man.choices = [(data.info_name, data.info_name) for data in PersonalInformation.query.order_by(PersonalInformation.info_code).all()]
 
@@ -52,7 +52,7 @@ class PersonalInformationForm(FlaskForm):
         super(PersonalInformationForm, self).__init__(*args, **kwargs)
         self.info_sex.choices = [('0', '男'), ('1', '女'), ('2', '未知')]
         self.info_department.choices = [('(新阳)网络信息科', '(新阳)网络信息科'), ('(厢竹)网络信息科', '(厢竹)网络信息科')]
-        self.info_title.choices = [('0', '助理工程师'), ('1', '程序员'), ('2', '网络管理员'), ('3', '网络工程师'), ('4', '其它职称')]
+        self.info_title.choices = [('0', '助理工程师'), ('1', '程序员'), ('2', '网络管理员'), ('3', '网络工程师'), ('4', '其它职称'), ('5', '高级工程师')]
 
 
 class LoginForm(FlaskForm):
